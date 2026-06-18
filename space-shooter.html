@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚀 Space Shooter - SHIU-AP</title>
+  <link rel="stylesheet" href="public.css">
+  <style>
+    body { margin:0; background:#000; color:#fff; font-family:sans-serif; overflow:hidden; }
+    canvas { 
+      display:block; 
+      margin:20px auto; 
+      border:3px solid #ff4040; 
+      box-shadow:0 0 40px #ff4040; 
+      cursor: crosshair;
+    }
+    .header-game { text-align:center; padding:15px; background:rgba(20,20,30,0.95); border-bottom:2px solid #ff4040; }
+    .back-btn {
+      position:absolute; top:20px; left:20px; padding:12px 28px;
+      background:linear-gradient(90deg,#b10000,#ff4040); color:white;
+      border:none; border-radius:50px; font-size:18px; cursor:pointer; z-index:100;
+    }
+    .score { position:absolute; top:25px; right:30px; font-size:24px; font-weight:bold; text-shadow:0 0 15px #00ffcc; }
+    .controls-hint {
+      position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
+      color:#666; font-size:14px; text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <button class="back-btn" onclick="history.back()">← برگشت</button>
+  
+  <div class="header-game">
+    <h1 style="margin:0; color:#ff4040;">SPACE SHOOTER ARENA</h1>
+  </div>
+
+  <div class="score" id="score">SCORE: 0</div>
+  <canvas id="game" width="480" height="640"></canvas>
+  <div class="controls-hint">
+    ← → یا A D حرکت • Space / کلیک = شلیک<br>
+    <strong>کلیک روی صفحه = حرکت سفینه به اونجا</strong>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+
+    let player = { x: 220, y: 550, width: 40, height: 40, speed: 10 };
+    let bullets = [];
+    let enemies = [];
+    let particles = [];
+    let score = 0;
+    let gameOver = false;
+    let keys = {};
+    let targetX = player.x; // برای حرکت نرم با کلیک
+
+    // کنترل کیبورد
+    document.addEventListener('keydown', e => keys[e.key] = true);
+    document.addEventListener('keyup', e => keys[e.key] = false);
+
+    // شلیک با Space
+    document.addEventListener('keydown', e => {
+      if ((e.key === ' ' || e.key === 'Spacebar') && !gameOver) shoot();
+    });
+
+    // کلیک = شلیک + حرکت به موقعیت کلیک
+    canvas.addEventListener('click', (e) => {
+      if (gameOver) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      
+      targetX = clickX - player.width / 2; // وسط سفینه بره روی کلیک
+      shoot(); // کلیک = شلیک هم
+    });
+
+    function shoot() {
+      bullets.push({ 
+        x: player.x + player.width/2 - 3, 
+        y: player.y - 5, 
+        width: 6, 
+        height: 18, 
+        speed: 14 
+      });
+    }
+
+    // Spawn دشمن
+    setInterval(() => {
+      if (!gameOver) {
+        enemies.push({
+          x: Math.random() * (canvas.width - 45),
+          y: -40,
+          width: 35,
+          height: 35,
+          speed: 3.5 + Math.random() * 2
+        });
+      }
+    }, 650);
+
+    function createExplosion(x, y) {
+      for (let i = 0; i < 18; i++) {
+        particles.push({
+          x, y,
+          vx: Math.random() * 9 - 4.5,
+          vy: Math.random() * 9 - 4.5,
+          life: 28,
+          color: Math.random() > 0.5 ? '#ff0' : '#f80'
+        });
+      }
+    }
+
+    function update() {
+      if (gameOver) return;
+
+      // حرکت با کیبورد
+      if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.x -= player.speed;
+      if (keys['ArrowRight'] || keys['d'] || keys['D']) player.x += player.speed;
+
+      // حرکت نرم به سمت کلیک (target)
+      if (Math.abs(player.x - targetX) > 5) {
+        player.x += (targetX - player.x) * 0.25; // حرکت نرم و سریع
+      }
+
+      // محدود کردن به صفحه
+      player.x = Math.max(10, Math.min(canvas.width - player.width - 10, player.x));
+
+      // گلوله‌ها
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        bullets[i].y -= bullets[i].speed;
+        if (bullets[i].y < -20) bullets.splice(i, 1);
+      }
+
+      // دشمن‌ها + برخورد
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        enemies[i].y += enemies[i].speed;
+
+        // برخورد با بازیکن
+        if (
+          player.x < enemies[i].x + enemies[i].width &&
+          player.x + player.width > enemies[i].x &&
+          player.y < enemies[i].y + enemies[i].height &&
+          player.y + player.height > enemies[i].y
+        ) {
+          gameOver = true;
+          createExplosion(player.x + 20, player.y + 20);
+        }
+
+        // برخورد گلوله
+        for (let j = bullets.length - 1; j >= 0; j--) {
+          if (
+            bullets[j].x < enemies[i].x + enemies[i].width - 5 &&
+            bullets[j].x + bullets[j].width > enemies[i].x + 5 &&
+            bullets[j].y < enemies[i].y + enemies[i].height &&
+            bullets[j].y + bullets[j].height > enemies[i].y
+          ) {
+            createExplosion(enemies[i].x + 17, enemies[i].y + 17);
+            enemies.splice(i, 1);
+            bullets.splice(j, 1);
+            score += 15;
+            scoreEl.textContent = `SCORE: ${score}`;
+            break;
+          }
+        }
+
+        if (enemies[i] && enemies[i].y > canvas.height) enemies.splice(i, 1);
+      }
+
+      // ذرات
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].x += particles[i].vx;
+        particles[i].y += particles[i].vy;
+        particles[i].life--;
+        if (particles[i].life <= 0) particles.splice(i, 1);
+      }
+    }
+
+    function draw() {
+      ctx.fillStyle = '#0a0011';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // ستاره‌ها
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 70; i++) {
+        let x = (Date.now() * 0.01 + i * 40) % canvas.width;
+        let y = (i * 31) % canvas.height;
+        ctx.fillRect(x, y, 1.8, 1.8);
+      }
+
+      // سفینه
+      ctx.fillStyle = '#00ffff';
+      ctx.fillRect(player.x + 12, player.y, 16, 32);
+      ctx.fillStyle = '#ff00aa';
+      ctx.fillRect(player.x, player.y + 25, player.width, 14);
+
+      // گلوله‌ها
+      ctx.fillStyle = '#ffff00';
+      bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
+
+      // دشمن‌ها
+      ctx.fillStyle = '#ff0044';
+      enemies.forEach(e => {
+        ctx.fillRect(e.x, e.y, e.width, e.height);
+        ctx.fillStyle = '#ffaa00';
+        ctx.fillRect(e.x + 8, e.y + 10, 20, 12);
+        ctx.fillStyle = '#ff0044';
+      });
+
+      // ذرات
+      particles.forEach(p => {
+        ctx.globalAlpha = p.life / 28;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 7, 7);
+      });
+      ctx.globalAlpha = 1;
+
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(200,0,0,0.85)';
+        ctx.font = 'bold 50px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2 - 20);
+        ctx.font = '24px sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(`امتیاز: ${score}`, canvas.width/2, canvas.height/2 + 40);
+      }
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+</html>
