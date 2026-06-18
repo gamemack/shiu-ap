@@ -1,80 +1,171 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="fa">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🚀 SHIU-AP • Space Shooter Arena</title>
-  <link rel="stylesheet" href="./public.css">
+  <title>🚀 Space Shooter - SHIU-AP</title>
+  <link rel="stylesheet" href="public.css">
   <style>
-    #gameModal {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.97); z-index: 10000; align-items: center; justify-content: center;
+    body { margin:0; background:#000; color:#fff; font-family:sans-serif; overflow:hidden; }
+    canvas { display:block; margin:30px auto; border:4px solid #ff4040; box-shadow:0 0 50px #ff4040; }
+    .back-btn {
+      position:absolute; top:20px; left:20px; padding:14px 30px;
+      background:linear-gradient(90deg,#b10000,#ff4040); color:white;
+      border:none; border-radius:50px; font-size:18px; cursor:pointer; z-index:100;
     }
-    .game-container { position: relative; max-width: 500px; }
-    .close-btn {
-      position: absolute; top: -20px; right: -20px; width: 50px; height: 50px;
-      background: #ff4040; color: white; border: none; border-radius: 50%;
-      font-size: 28px; cursor: pointer; z-index: 10;
-    }
-    canvas { border: 4px solid #ff4040; box-shadow: 0 0 50px #ff4040; }
+    .score { position:absolute; top:25px; right:30px; font-size:26px; font-weight:bold; color:#0ff; text-shadow:0 0 15px #0ff; }
   </style>
 </head>
-<body class="lang-zh">
-  <div class="container">
-    <header class="header">
-      <div class="logo">🚀 SHIU-AP SPACE SHOOTER</div>
-      <div class="lang-switch">
-        <button data-lang="zh" class="active" onclick="switchLang('zh')">中文</button>
-        <button data-lang="fa" onclick="switchLang('fa')">فارسی</button>
-        <button data-lang="en" onclick="switchLang('en')">English</button>
-      </div>
-    </header>
-
-    <section style="text-align:center; margin:40px 0;">
-      <h1 style="font-size:48px; background:linear-gradient(90deg,#ff4040,#00ccff); -webkit-background-clip:text; color:transparent;">
-        SPACE SHOOTER ARENA
-      </h1>
-    </section>
-
-    <h2 style="text-align:center; margin:30px 0;">🎯 لیست بازی‌ها</h2>
-    <div id="gameGrid" class="game-grid"></div>
-
-    <!-- Modal بازی -->
-    <div id="gameModal">
-      <div class="game-container">
-        <button class="close-btn" onclick="closeGame()">✕</button>
-        <h2 id="modalTitle" style="text-align:center; color:#ff4040; margin:10px;">SPACE SHOOTER</h2>
-        <canvas id="gameCanvas" width="480" height="640"></canvas>
-      </div>
-    </div>
-
-    <!-- کامنت -->
-    <div id="commentSection" class="comment-section">
-      <h3>💬 نظرات</h3>
-      <div id="commentContainer"></div>
-      <input type="text" id="commentUser" placeholder="نام شما">
-      <textarea id="commentText" rows="3" placeholder="نظر خود را بنویسید..."></textarea>
-      <button id="submitComment">ارسال کامنت</button>
-    </div>
-
-    <!-- آپلود -->
-    <div class="upload-area">
-      <h3>📤 آپلود بازی جدید</h3>
-      <form id="uploadForm">
-        <input type="text" id="up_name_zh" placeholder="نام چینی">
-        <input type="text" id="up_name_fa" placeholder="نام فارسی">
-        <input type="text" id="up_name_en" placeholder="نام انگلیسی">
-        <textarea id="up_desc_zh" placeholder="توضیحات"></textarea>
-        <input type="text" id="up_image" placeholder="لینک تصویر">
-        <button type="submit">آپلود</button>
-      </form>
-    </div>
-
-    <footer style="text-align:center; margin-top:60px; color:#555;">
-      © 2026 SHIU-AP • Mehdi Jahaan Redesign 🚀
-    </footer>
+<body>
+  <button class="back-btn" onclick="history.back()">← برگشت به لیست</button>
+  
+  <div style="text-align:center; padding:15px; background:rgba(20,20,30,0.9);">
+    <h1 style="margin:0; color:#ff4040;">SPACE SHOOTER ARENA</h1>
   </div>
 
-  <script type="module" src="./main.js"></script>
+  <div class="score" id="score">SCORE: 0</div>
+  <canvas id="game" width="480" height="640"></canvas>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+
+    let player = { x: 220, y: 550, width: 40, height: 40, speed: 9 };
+    let bullets = [];
+    let enemies = [];
+    let particles = [];
+    let score = 0;
+    let gameOver = false;
+    let keys = {};
+    let targetX = player.x;
+
+    // کنترل کیبورد
+    document.addEventListener('keydown', e => { keys[e.key] = true; });
+    document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+    // کلیک = حرکت + شلیک
+    canvas.addEventListener('click', e => {
+      if (gameOver) return;
+      const rect = canvas.getBoundingClientRect();
+      targetX = e.clientX - rect.left - player.width/2;
+      shoot();
+    });
+
+    function shoot() {
+      bullets.push({ x: player.x + 17, y: player.y, width: 6, height: 20, speed: 15 });
+    }
+
+    // Spawn دشمن
+    setInterval(() => {
+      if (!gameOver) {
+        enemies.push({ x: Math.random()*(canvas.width-40), y: -40, width:35, height:35, speed:4 });
+      }
+    }, 600);
+
+    function createExplosion(x, y) {
+      for (let i = 0; i < 20; i++) {
+        particles.push({ x, y, vx: Math.random()*8-4, vy: Math.random()*8-4, life:30, color:'#ff0' });
+      }
+    }
+
+    function update() {
+      if (gameOver) return;
+
+      if (keys['ArrowLeft'] || keys['a']) player.x -= player.speed;
+      if (keys['ArrowRight'] || keys['d']) player.x += player.speed;
+
+      // حرکت نرم با کلیک
+      player.x += (targetX - player.x) * 0.3;
+
+      player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+
+      // bullets
+      for (let i = bullets.length-1; i >= 0; i--) {
+        bullets[i].y -= bullets[i].speed;
+        if (bullets[i].y < 0) bullets.splice(i,1);
+      }
+
+      // enemies
+      for (let i = enemies.length-1; i >= 0; i--) {
+        enemies[i].y += enemies[i].speed;
+
+        // برخورد با بازیکن
+        if (player.x < enemies[i].x + enemies[i].width && 
+            player.x + player.width > enemies[i].x &&
+            player.y < enemies[i].y + enemies[i].height && 
+            player.y + player.height > enemies[i].y) {
+          gameOver = true;
+          createExplosion(player.x+20, player.y+20);
+        }
+
+        // برخورد گلوله
+        for (let j = bullets.length-1; j >= 0; j--) {
+          if (bullets[j].x < enemies[i].x + enemies[i].width && 
+              bullets[j].x + bullets[j].width > enemies[i].x &&
+              bullets[j].y < enemies[i].y + enemies[i].height && 
+              bullets[j].y + bullets[j].height > enemies[i].y) {
+            createExplosion(enemies[i].x+15, enemies[i].y+15);
+            enemies.splice(i,1);
+            bullets.splice(j,1);
+            score += 20;
+            scoreEl.textContent = `SCORE: ${score}`;
+            break;
+          }
+        }
+        if (enemies[i] && enemies[i].y > canvas.height) enemies.splice(i,1);
+      }
+
+      // particles
+      for (let i = particles.length-1; i >= 0; i--) {
+        particles[i].x += particles[i].vx;
+        particles[i].y += particles[i].vy;
+        particles[i].life--;
+        if (particles[i].life <= 0) particles.splice(i,1);
+      }
+    }
+
+    function draw() {
+      ctx.fillStyle = '#05050f';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // player
+      ctx.fillStyle = '#00ffff';
+      ctx.fillRect(player.x+10, player.y, 20, 35);
+      ctx.fillStyle = '#ff0088';
+      ctx.fillRect(player.x, player.y+28, 40, 12);
+
+      // bullets
+      ctx.fillStyle = '#ffff00';
+      bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
+
+      // enemies
+      ctx.fillStyle = '#ff0033';
+      enemies.forEach(e => ctx.fillRect(e.x, e.y, e.width, e.height));
+
+      // particles
+      particles.forEach(p => {
+        ctx.globalAlpha = p.life/30;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 6, 6);
+      });
+      ctx.globalAlpha = 1;
+
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(255,0,0,0.9)';
+        ctx.font = 'bold 48px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2);
+      }
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
 </body>
-  </html>
+</html>
