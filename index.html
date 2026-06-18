@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>شیویپ - 在线游戏平台</title>
+  <link rel="stylesheet" href="./public.css">
+</head>
+<body class="lang-zh">
+  <div class="container">
+    <!-- هدر -->
+    <header class="header">
+      <div class="logo">🎮 <span>Chenshups</span> 游戏</div>
+      <div class="lang-switch">
+        <button data-lang="zh" class="active" onclick="switchLang('zh')">中文</button>
+        <button data-lang="fa" onclick="switchLang('fa')">فارسی</button>
+        <button data-lang="en" onclick="switchLang('en')">English</button>
+      </div>
+    </header>
+
+    <!-- توضیح کوتاه -->
+    <p style="text-align:center; color:#aaa; margin-bottom:20px;">
+      🀄 在线中国游戏 | بازی‌های آنلاین چینی | Chinese Online Games
+    </p>
+
+    <!-- گرید بازی‌ها -->
+    <h2 id="sectionTitle">🎯 游戏列表</h2>
+    <div id="gameGrid" class="game-grid"></div>
+
+    <!-- بخش کامنت‌ها -->
+    <div id="commentSection" class="comment-section">
+      <h3>💬 评论 / نظرات / Comments</h3>
+      <div id="commentContainer"></div>
+      <input type="text" id="commentUser" placeholder="نام شما / Your name" style="width:100%; padding:8px; margin:8px 0; background:#333; border:1px solid #555; color:#fff; border-radius:6px;">
+      <textarea id="commentText" rows="3" placeholder="نظر خود را بنویسید..."></textarea>
+      <button id="submitComment" class="btn-submit">ارسال کامنت</button>
+    </div>
+
+    <!-- بخش آپلود -->
+    <div class="upload-area">
+      <h3>📤 آپلود بازی جدید / Upload New Game</h3>
+      <form id="uploadForm">
+        <input type="text" id="up_name_zh" placeholder="نام چینی (اجباری)" required>
+        <input type="text" id="up_name_fa" placeholder="نام فارسی">
+        <input type="text" id="up_name_en" placeholder="Name in English">
+        <textarea id="up_desc_zh" rows="2" placeholder="توضیحات چینی"></textarea>
+        <input type="text" id="up_image" placeholder="لینک تصویر (اختیاری)">
+        <button type="submit" class="btn-upload">➕ آپلود / Upload</button>
+      </form>
+    </div>
+
+    <footer style="text-align:center; margin-top:50px; color:#555; border-top:1px solid #333; padding-top:20px;">
+      © 2026 Chenshups · شیویپ
+    </footer>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "games": [
+    {
+      "id": 1,
+      "name_zh": "麻将",
+      "name_fa": "ماژانگ",
+      "name_en": "Mahjong",
+      "desc_zh": "بازی کلاسیک چینی",
+      "desc_fa": "بازی کلاسیک چینی",
+      "desc_en": "Classic Chinese Game",
+      "image": "https://via.placeholder.com/150/FF0000/FFFFFF?text=Mahjong",
+      "uploader": "admin",
+      "views": 0,
+      "comments": []
+    },
+    {
+      "id": 2,
+      "name_zh": "象棋",
+      "name_fa": "شطرنج چینی",
+      "name_en": "Chinese Chess",
+      "desc_zh": "شطرنج چینی استراتژیک",
+      "desc_fa": "شطرنج چینی استراتژیک",
+      "desc_en": "Strategic Chinese Chess",
+      "image": "https://via.placeholder.com/150/0000FF/FFFFFF?text=Chess",
+      "uploader": "admin",
+      "views": 0,
+      "comments": []
+    }
+  ]
+}
