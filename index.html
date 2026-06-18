@@ -3,25 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🚀 SHIU-AP • Space Shooter</title>
+  <title>🚀 SHIU-AP • Space Shooter Arena</title>
   <link rel="stylesheet" href="./public.css">
   <style>
     #gameModal {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.97); z-index: 10000; align-items: center; justify-content: center;
     }
-    .game-container { position: relative; }
+    .game-container { position: relative; max-width: 500px; }
     .close-btn {
-      position: absolute; top: -15px; right: -15px; background: #ff4040; color: white;
-      width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 20px;
-      cursor: pointer; z-index: 10;
+      position: absolute; top: -20px; right: -20px; width: 50px; height: 50px;
+      background: #ff4040; color: white; border: none; border-radius: 50%;
+      font-size: 28px; cursor: pointer; z-index: 10;
     }
+    canvas { border: 4px solid #ff4040; box-shadow: 0 0 50px #ff4040; }
   </style>
 </head>
 <body class="lang-zh">
   <div class="container">
     <header class="header">
-      <div class="logo">🚀 SHIU-AP <span style="color:#aaa;font-size:0.7em;">SPACE SHOOTER</span></div>
+      <div class="logo">🚀 SHIU-AP SPACE SHOOTER</div>
       <div class="lang-switch">
         <button data-lang="zh" class="active" onclick="switchLang('zh')">中文</button>
         <button data-lang="fa" onclick="switchLang('fa')">فارسی</button>
@@ -30,34 +31,50 @@
     </header>
 
     <section style="text-align:center; margin:40px 0;">
-      <h1 style="font-size:52px; background:linear-gradient(90deg,#ff4040,#00ccff); -webkit-background-clip:text; color:transparent;">
+      <h1 style="font-size:48px; background:linear-gradient(90deg,#ff4040,#00ccff); -webkit-background-clip:text; color:transparent;">
         SPACE SHOOTER ARENA
       </h1>
     </section>
 
-    <h2 style="text-align:center; margin:30px 0; font-size:28px;">🎯 بازی‌های موجود</h2>
+    <h2 style="text-align:center; margin:30px 0;">🎯 لیست بازی‌ها</h2>
     <div id="gameGrid" class="game-grid"></div>
 
     <!-- Modal بازی -->
     <div id="gameModal">
       <div class="game-container">
         <button class="close-btn" onclick="closeGame()">✕</button>
-        <div class="header-game" style="background:#111; padding:10px; border-bottom:2px solid #ff4040;">
-          <h2 id="modalTitle" style="margin:0; color:#ff4040;">SPACE SHOOTER</h2>
-        </div>
-        <canvas id="gameCanvas" width="480" height="640" style="display:block; margin:0 auto; border:3px solid #ff4040; box-shadow:0 0 40px #ff4040;"></canvas>
+        <h2 id="modalTitle" style="text-align:center; color:#ff4040; margin:10px;">SPACE SHOOTER</h2>
+        <canvas id="gameCanvas" width="480" height="640"></canvas>
       </div>
     </div>
 
-    <!-- بخش کامنت و آپلود (همان قبلی) -->
-    <div id="commentSection" class="comment-section">...</div>
-    <div class="upload-area">...</div>
+    <!-- کامنت -->
+    <div id="commentSection" class="comment-section">
+      <h3>💬 نظرات</h3>
+      <div id="commentContainer"></div>
+      <input type="text" id="commentUser" placeholder="نام شما">
+      <textarea id="commentText" rows="3" placeholder="نظر خود را بنویسید..."></textarea>
+      <button id="submitComment">ارسال کامنت</button>
+    </div>
+
+    <!-- آپلود -->
+    <div class="upload-area">
+      <h3>📤 آپلود بازی جدید</h3>
+      <form id="uploadForm">
+        <input type="text" id="up_name_zh" placeholder="نام چینی">
+        <input type="text" id="up_name_fa" placeholder="نام فارسی">
+        <input type="text" id="up_name_en" placeholder="نام انگلیسی">
+        <textarea id="up_desc_zh" placeholder="توضیحات"></textarea>
+        <input type="text" id="up_image" placeholder="لینک تصویر">
+        <button type="submit">آپلود</button>
+      </form>
+    </div>
 
     <footer style="text-align:center; margin-top:60px; color:#555;">
-      © 2026 SHIU-AP • Powered by Mehdi Jahaan 🚀
+      © 2026 SHIU-AP • Mehdi Jahaan Redesign 🚀
     </footer>
   </div>
 
   <script type="module" src="./main.js"></script>
 </body>
-</html>
+  </html>
